@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# Backend FastAPI URL
+# Backend FastAPI URL (Ensure this is accessible from Streamlit Cloud)
 BACKEND_URL = "http://localhost:8000"  # Adjust as needed
 
 model_mapper = {
@@ -24,8 +24,19 @@ def rag(year, qtr, model, prompt):
         "model": model_mapper[model],
         "prompt": prompt
     }
-    response = requests.post(url, json=data)
-    return response.json()
+    
+    try:
+        response = requests.post(url, json=data, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.ConnectionError:
+        st.error("Error: Unable to connect to the backend. Please ensure the server is running and accessible.")
+    except requests.Timeout:
+        st.error("Error: The request timed out. Please try again later.")
+    except requests.RequestException as e:
+        st.error(f"Error: An unexpected issue occurred. {str(e)}")
+    
+    return None  # Return None if an error occurs
 
 # Streamlit UI
 st.title("NVIDIA Agentic RAG Explorer")
@@ -33,31 +44,33 @@ st.title("NVIDIA Agentic RAG Explorer")
 mode = 'nvidia'
 st.header("Financial Report Query")
 
-# Create side-by-side columns for Year and Quarter selection
-col1, col2, col3 = st.columns([1, 1, 1.5])  # Adjust column width ratio as needed
+# Create side-by-side columns for Year, Quarter, and Model selection
+col1, col2, col3 = st.columns([1, 1, 1.5])
 
 with col1:
-    year = st.selectbox("Select Year:", [str(yr) for yr in range(2021, 2026)], index=4)  # Default to 2025
+    year = st.selectbox("Select Year:", [str(yr) for yr in range(2021, 2026)], index=4)
 
 with col2:
-    qtr = st.selectbox("Select Quarter:", ['Q1', 'Q2', 'Q3', 'Q4'], index=0)  # Default to Q1
+    qtr = st.selectbox("Select Quarter:", ['Q1', 'Q2', 'Q3', 'Q4'], index=0)
 
 with col3:
-    model_choice = st.selectbox("Select the data source:", available_models, index=available_models.index("gemini/gemini-1.5-pro"))  # Default to gemini-1.5-pro
+    model_choice = st.selectbox("Select the data source:", available_models, index=available_models.index("gemini/gemini-1.5-pro"))
 
 # User input for query
 query = st.text_area("Enter your query:", "", height=150)
 
 # Button to submit the query
 if st.button("Submit Query"):
-    if query.strip():  # Ensure the prompt is not empty
+    if query.strip():
         with st.spinner("Querying the backend..."):
             result = rag(year, qtr, model_choice, query)
 
-        if "markdown" in result:
+        if result and "markdown" in result:
             st.subheader("Generated Response:")
             st.write(result["markdown"])
+        elif result is None:
+            st.error("Failed to retrieve data. Please check the backend connection.")
         else:
-            st.error("Something went wrong")
+            st.error("Something went wrong.")
     else:
         st.error("Please enter a valid query.")
