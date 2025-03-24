@@ -27,17 +27,12 @@ def rag(year, qtr, model, prompt):
     }
     
     try:
-        response = requests.post(url, json=data, timeout=10)
+        response = requests.post(url, json=data, timeout=60)
         response.raise_for_status()
         return response.json()
     except requests.ConnectionError:
         st.error("Error: Unable to connect to the backend. Please ensure the server is running and accessible.")
-    except requests.Timeout:
-        st.error("Error: The request timed out. Please try again later.")
-    except requests.RequestException as e:
-        st.error(f"Error: An unexpected issue occurred. {str(e)}")
-    
-    return None  # Return None if an error occurs
+    return None  
 
 # Streamlit UI
 st.title("NVIDIA Agentic RAG Explorer")
