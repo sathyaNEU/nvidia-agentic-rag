@@ -3,7 +3,10 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
-BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"
+# Backend FastAPI URL (Ensure this is accessible from Streamlit Cloud)
+BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"  # Adjust as needed
+# BACKEND_URL = "http://localhost:8000"
+
 model_mapper = {
     "openai/gpt-4o": "gpt-4o-2024-08-06",
     "openai/gpt-3.5-turbo": "gpt-3.5-turbo-0125",
@@ -57,7 +60,7 @@ with col3:
 with st.sidebar:
     st.markdown("### Agent Configurations")  # Sidebar heading
     st.write("")  # Adds one newline for spacing
-    rag_top_k = st.slider("RAG Top K Results", 1, 5, 5)
+    rag_top_k = st.slider("RAG Top K Results", 1, 10, 5)
     web_top_k = st.slider("WEB API Top K Results", 1, 5, 5)
     web_threshold = st.slider("WEB API Score Threshold", 0.0, 1.0, 0.3, step=0.01)
 
