@@ -66,7 +66,6 @@ if st.button("Submit Query"):
             st.session_state['markdown'] = result['markdown']
         if result and "markdown" in result:
             st.subheader("Generated Response:")
-            st.write(result["markdown"])
         elif result is None:
             st.error("Failed to retrieve data. Please check the backend connection.")
         else:
