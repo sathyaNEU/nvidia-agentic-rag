@@ -76,7 +76,7 @@ if st.button("Submit Query"):
 
 if 'markdown' in st.session_state and st.session_state['markdown']:
     st.subheader("Generated Response:")
-    st.write(result["markdown"])
+    st.write(st.session_state["markdown"])
 
 if 'chart_data' in st.session_state and st.session_state['chart_data']:
     st.subheader("Snowflake powered charts:")
