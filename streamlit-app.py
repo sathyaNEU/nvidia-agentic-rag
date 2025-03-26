@@ -1,9 +1,11 @@
 import streamlit as st
+import pandas as pd
 import requests
+import matplotlib.pyplot as plt
 
 # Backend FastAPI URL (Ensure this is accessible from Streamlit Cloud)
 BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"  # Adjust as needed
-# BACKEND_URL = "https://localhost:8000"
+# BACKEND_URL = "http://localhost:8000"
 
 model_mapper = {
     "openai/gpt-4o": "gpt-4o-2024-08-06",
@@ -50,7 +52,7 @@ with col2:
     qtr = st.selectbox("Select Quarter:", ['Q1', 'Q2', 'Q3', 'Q4'], index=0)
 
 with col3:
-    model_choice = st.selectbox("Select the data source:", available_models, index=available_models.index("gemini/gemini-1.5-pro"))
+    model_choice = st.selectbox("Select available models:", available_models, index=available_models.index("gemini/gemini-1.5-pro"))
 
 # User input for query
 query = st.text_area("Enter your query:", "", height=150)
@@ -60,7 +62,8 @@ if st.button("Submit Query"):
     if query.strip():
         with st.spinner("Querying the backend..."):
             result = rag(year, qtr, model_choice, query)
-
+            st.session_state['chart_data'] = result['charts']
+            st.session_state['markdown'] = result['markdown']
         if result and "markdown" in result:
             st.subheader("Generated Response:")
             st.write(result["markdown"])
@@ -70,3 +73,31 @@ if st.button("Submit Query"):
             st.error("Something went wrong.")
     else:
         st.error("Please enter a valid query.")
+
+if 'markdown' in st.session_state and st.session_state['markdown']:
+    st.subheader("Generated Response:")
+    st.write(result["markdown"])
+
+if 'chart_data' in st.session_state and st.session_state['chart_data']:
+    st.subheader("Snowflake powered charts:")
+    data = st.session_state['chart_data']
+    for idx, chart_data in enumerate(data):
+        df = pd.DataFrame(chart_data)
+        # Extract metric names dynamically (excluding 'year' and 'qtr')
+        metrics = list(df.columns)
+        metrics.remove('year')
+        metrics.remove('qtr')
+
+        # Create a new column for x-axis labels
+        df['Year-Qtr'] = df.apply(lambda row: f"{int(row['year'])} Q{int(row['qtr'])}", axis=1)
+
+        # Plot all metrics (except 'year' and 'qtr')
+        for metric in metrics:
+            fig, ax = plt.subplots()
+            ax.bar(df['Year-Qtr'], df[metric], color='skyblue')
+            ax.set_xlabel("Year - Quarter")
+            ax.set_ylabel(metric)
+            ax.set_title(f"{metric} over Time")
+            plt.xticks(rotation=45)
+
+            st.pyplot(fig)
