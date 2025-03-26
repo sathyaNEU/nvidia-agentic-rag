@@ -3,7 +3,6 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
-# Backend FastAPI URL (Ensure this is accessible from Streamlit Cloud)
 BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"  # Adjust as needed
 # BACKEND_URL = "http://localhost:8000"
 
