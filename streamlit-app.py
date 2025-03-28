@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
-BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"  # Adjust as needed
+BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app" 
 
 model_mapper = {
     "openai/gpt-4o": "gpt-4o-2024-08-06",
@@ -15,9 +15,9 @@ model_mapper = {
 }
 
 available_models = list(model_mapper.keys())
-
+available_agents  = ['web', 'rag', 'snowflake', 'combined']
 # Function to call the query API
-def rag(year, qtr, model, prompt, rag_top_k, web_top_k, web_threshold):
+def rag(year, qtr, model, prompt, rag_top_k, web_top_k, web_threshold, selected_agent):
     url = f"{BACKEND_URL}/qa"
     data = {
         "year": year,
@@ -26,7 +26,8 @@ def rag(year, qtr, model, prompt, rag_top_k, web_top_k, web_threshold):
         "prompt": prompt,
         "rag_top_k": rag_top_k,
         "web_top_k": web_top_k,
-        "web_threshold": web_threshold
+        "web_threshold": web_threshold,
+        "available_agents": selected_agent
     }
     
     try:
@@ -61,7 +62,7 @@ with st.sidebar:
     rag_top_k = st.slider("RAG Top K Results", 1, 10, 5)
     web_top_k = st.slider("WEB API Top K Results", 1, 5, 5)
     web_threshold = st.slider("WEB API Score Threshold", 0.0, 1.0, 0.3, step=0.01)
-
+    selected_agent = st.selectbox("Select Agent:", available_agents, index=available_agents.index("combined"))
 
 # User input for query
 query = st.text_area("Enter your query:", "", height=150)
@@ -70,7 +71,7 @@ query = st.text_area("Enter your query:", "", height=150)
 if st.button("Submit Query"):
     if query.strip():
         with st.spinner("Querying the backend..."):
-            result = rag(year, qtr, model_choice, query, rag_top_k, web_top_k, web_threshold)
+            result = rag(year, qtr, model_choice, query, rag_top_k, web_top_k, web_threshold, selected_agent)
             st.session_state['chart_data'] = result['charts']
             st.session_state['markdown'] = result['markdown']
         if result and "markdown" in result:
