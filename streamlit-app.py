@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
+#deployed link
 BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app" 
 
 model_mapper = {
