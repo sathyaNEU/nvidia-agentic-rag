@@ -3,7 +3,6 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
-# Backend FastAPI URL (Ensure this is accessible from Streamlit Cloud)
 BACKEND_URL = "https://agentic-rag-451496260635.us-central1.run.app"  # Adjust as needed
 
 model_mapper = {
@@ -105,7 +104,6 @@ if 'chart_data' in st.session_state and st.session_state['chart_data']:
         df['Year-Qtr'] = df.apply(lambda row: f"{int(row['year'])} - Q{int(row['qtr'])}", axis=1)
 
         highlight_x = f"{st.session_state['year']} - Q{st.session_state['qtr']}"  # The quarter to highlight
-        st.write(highlight_x)
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(12, 6))
         # Bar colors (highlight specific quarter)
